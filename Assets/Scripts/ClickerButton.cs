@@ -4,8 +4,11 @@ using UnityEngine.UI;
 
 public class ClickerButton : MonoBehaviour
 {
+    public bool isLocked = false;
     [SerializeField] private Button clickerButton;
     [SerializeField] private Button upgradeButton;
+    [SerializeField] private Button unlockButton;
+    [SerializeField] private TMP_Text unlockCostText;
     [SerializeField] private ProgressBar levelProgressBar;
     [SerializeField] private TMP_Text levelProgressText;
     [SerializeField] private TMP_Text upgradeCostText;
@@ -14,22 +17,27 @@ public class ClickerButton : MonoBehaviour
     [SerializeField] private float collectSpeed = 1.0f; // Base speed for auto-collect
     [SerializeField] private float progressMultiplier = 1.0f; // Difficulty multiplier
     [SerializeField] private TMP_Text collectionAmountText;
-
+    [SerializeField] private GameObject levelLockedOverlay;
+    [SerializeField] private TMP_Text levelLockedText;
     [SerializeField] private double collectionAmount = 1.0f;
     [SerializeField] private double currentUpgradeCost = 200.0f;
+    [SerializeField] private double unlockCost = 10000;
     private int level = 1;
+    public int levelRequiredToUnlock = 0;
     float collectionProgress = 0.0f;
 
     private void OnEnable()
     {
         clickerButton.onClick.AddListener(ManualCollect);
         upgradeButton.onClick.AddListener(Upgrade);
+        unlockButton.onClick.AddListener(Unlock);
     }
 
     private void OnDisable()
     {
         clickerButton.onClick.RemoveAllListeners();
         upgradeButton.onClick.RemoveAllListeners();
+        unlockButton.onClick.RemoveAllListeners();
     }
 
     private void Start()
@@ -37,10 +45,14 @@ public class ClickerButton : MonoBehaviour
         UpdateCollectionAmountText();
         UpdateLevelText();
         UpdateUpgradeCostText();
+        UpdateUnlockStatus();
+        UpdateLevelRequirementStatus();
     }
 
     private void Update()
     {
+        if(isLocked) return;
+
         // Increment the collection progress over time, adjusted by the multiplier
         collectionProgress += (Time.deltaTime * collectSpeed) / progressMultiplier;
 
@@ -49,8 +61,10 @@ public class ClickerButton : MonoBehaviour
 
     private void ManualCollect()
     {
+        if (isLocked) return;
+
         // Increment the collection progress manually, adjusted by the multiplier
-        collectionProgress += 0.1f / progressMultiplier; // Increase by a fixed amount divided by the multiplier
+        collectionProgress += GameManager.Instance.pointerValue / progressMultiplier; // Increase by a fixed amount divided by the multiplier
 
         CheckProgress();
     }
@@ -59,14 +73,24 @@ public class ClickerButton : MonoBehaviour
     {
         if (GameManager.Instance.CurrentMoney > currentUpgradeCost)
         {
+            GameManager.Instance.CurrentMoney -= currentUpgradeCost;
             level++;
             collectionAmount *= 1.5f;
-            UpdateCollectionAmountText();
-
-            GameManager.Instance.CurrentMoney -= currentUpgradeCost;
             currentUpgradeCost *= 2.0f;
+
+            UpdateCollectionAmountText();
             UpdateLevelText();
             UpdateUpgradeCostText();
+        }
+    }
+
+    private void Unlock()
+    {
+        if(GameManager.Instance.CurrentMoney > unlockCost)
+        {
+            GameManager.Instance.CurrentMoney -= unlockCost;
+            isLocked = false;
+            UpdateUnlockStatus();
         }
     }
 
@@ -100,5 +124,24 @@ public class ClickerButton : MonoBehaviour
     private void UpdateUpgradeCostText()
     {
         upgradeCostText.text = "cost $" + NumberFormatter.FormatLargeNumber(currentUpgradeCost);
+    }
+
+    private void UpdateUnlockStatus()
+    {
+        unlockCostText.text = "Unlock cost $" + NumberFormatter.FormatLargeNumber(unlockCost);
+        unlockButton.gameObject.SetActive(isLocked);
+    }
+    
+    public void UpdateLevelRequirementStatus()
+    {
+        if(GameManager.Instance.currentLevel < levelRequiredToUnlock)
+        {
+            levelLockedOverlay.SetActive(true);
+            levelLockedText.text = "Level required " + levelRequiredToUnlock.ToString();
+        }
+        else
+        {
+            levelLockedOverlay.SetActive(false);
+        }
     }
 }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -12,8 +11,11 @@ public class GameManager : MonoBehaviour
 
     public int currentLevel = 1;
     public float m_currentLevelProgress = 0.0f;
+    public float pointerValueUpgradeStep = 0.1f;
+    public float maxDifficulty = 5.0f;
     [SerializeField] private float levelUpRequirement = 100.0f;
     [SerializeField] private float levelUpMultiplier = 1.2f;
+    public float pointerValue = 0.1f; // amount to collect on manual clicks
 
     private double m_CurrentMoney;
     public double CurrentMoney
@@ -94,6 +96,12 @@ public class GameManager : MonoBehaviour
             // Update UI
             UiManager.Instance.UpdateLevel(currentLevel);
             UiManager.Instance.UpdateLevelBar(m_currentLevelProgress / levelUpRequirement);
+
+            // Update generators status
+            foreach(ClickerButton generator in LevelManager.Instance.generators)
+            {
+                generator.UpdateLevelRequirementStatus();
+            }
         }
     }
 
@@ -103,5 +111,17 @@ public class GameManager : MonoBehaviour
 
         // Update the level bar based on the new requirement
         UiManager.Instance.UpdateLevelBar(m_currentLevelProgress / levelUpRequirement);
+    }
+
+    public void Upgrade(UpgradeType upgradeType)
+    {
+        switch (upgradeType)
+        {
+            case UpgradeType.ManualClick:
+                pointerValue = Mathf.Min(pointerValue + pointerValueUpgradeStep, maxDifficulty);
+                break;
+            default:
+                break;
+        }
     }
 }
