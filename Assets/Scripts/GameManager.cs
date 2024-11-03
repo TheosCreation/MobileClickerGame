@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Linq;
 using UnityEngine;
@@ -7,9 +8,14 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
     [HideInInspector] public GameState GameState;
-    private double m_CurrentMoney;
     public string mainMenuScene = "MainMenu";
 
+    public int currentLevel = 1;
+    public float m_currentLevelProgress = 0.0f;
+    [SerializeField] private float levelUpRequirement = 100.0f;
+    [SerializeField] private float levelUpMultiplier = 1.2f;
+
+    private double m_CurrentMoney;
     public double CurrentMoney
     {
         get
@@ -18,6 +24,12 @@ public class GameManager : MonoBehaviour
         }
         set
         {
+            double difference = value - m_CurrentMoney;
+            if (difference > 0)
+            {
+                UpdateLevelProgress(difference);
+            }
+
             m_CurrentMoney = value;
             UiManager.Instance.UpdateCurrentMoneyText(value);
         }
@@ -64,5 +76,32 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("Quit");
         Application.Quit();
+    }
+
+    public void UpgradeLevel()
+    {
+        if (m_currentLevelProgress >= levelUpRequirement)
+        {
+            // Level up
+            currentLevel++;
+
+            // Reset progress
+            m_currentLevelProgress = 0.0f;
+
+            // Increase the requirement for the next level
+            levelUpRequirement *= levelUpMultiplier;
+
+            // Update UI
+            UiManager.Instance.UpdateLevel(currentLevel);
+            UiManager.Instance.UpdateLevelBar(m_currentLevelProgress / levelUpRequirement);
+        }
+    }
+
+    private void UpdateLevelProgress(double value)
+    {
+        m_currentLevelProgress += (float)value;
+
+        // Update the level bar based on the new requirement
+        UiManager.Instance.UpdateLevelBar(m_currentLevelProgress / levelUpRequirement);
     }
 }

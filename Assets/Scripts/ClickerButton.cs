@@ -8,6 +8,7 @@ public class ClickerButton : MonoBehaviour
     [SerializeField] private Button upgradeButton;
     [SerializeField] private ProgressBar levelProgressBar;
     [SerializeField] private TMP_Text levelProgressText;
+    [SerializeField] private TMP_Text upgradeCostText;
 
     [SerializeField] private ProgressBar collectionProgressBar;
     [SerializeField] private float collectSpeed = 1.0f; // Base speed for auto-collect
@@ -35,6 +36,7 @@ public class ClickerButton : MonoBehaviour
     {
         UpdateCollectionAmountText();
         UpdateLevelText();
+        UpdateUpgradeCostText();
     }
 
     private void Update()
@@ -64,6 +66,7 @@ public class ClickerButton : MonoBehaviour
             GameManager.Instance.CurrentMoney -= currentUpgradeCost;
             currentUpgradeCost *= 2.0f;
             UpdateLevelText();
+            UpdateUpgradeCostText();
         }
     }
 
@@ -87,11 +90,15 @@ public class ClickerButton : MonoBehaviour
 
     private void UpdateCollectionAmountText()
     {
-        collectionAmountText.text = "earn $ " + NumberFormatter.FormatLargeNumber(collectionAmount);
+        collectionAmountText.text = "earn $" + NumberFormatter.FormatLargeNumber(collectionAmount);
     }
 
     private void UpdateLevelText()
     {
         levelProgressText.text = level.ToString();
+    }
+    private void UpdateUpgradeCostText()
+    {
+        upgradeCostText.text = "cost $" + NumberFormatter.FormatLargeNumber(currentUpgradeCost);
     }
 }
