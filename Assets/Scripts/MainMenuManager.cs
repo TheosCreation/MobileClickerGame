@@ -4,8 +4,8 @@ public class MainMenuManager : MonoBehaviour
 {
     public static MainMenuManager Instance { get; private set; }
 
-    private MainMenuMainPage mainPage;
-    private LoadingPage loadingPage;
+    [SerializeField] private MainMenuMainPage mainPage;
+    [SerializeField] private LoadingPage loadingPage;
 
 
     private void Awake()
@@ -19,9 +19,6 @@ public class MainMenuManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-
-        mainPage = GetComponentInChildren<MainMenuMainPage>();
-        loadingPage = GetComponentInChildren<LoadingPage>();
     }
 
     private void Start()

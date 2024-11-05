@@ -59,6 +59,7 @@ public class GameManager : MonoBehaviour
         //load from save files
 
 
+        Debug.Log("Game manager init sucessfully");
         yield return null;
     }
 
