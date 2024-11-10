@@ -37,5 +37,6 @@ public class AdManager : MonoBehaviour
 
         var adreq = new AdRequest();
         m_banner.LoadAd(adreq);
+        //m_banner.Hide();
     }
 }

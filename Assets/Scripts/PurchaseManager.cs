@@ -7,6 +7,7 @@ public class PurchaseManager : MonoBehaviour, IDetailedStoreListener
 {
     public static PurchaseManager Instance { get; private set; }
     public bool m_initialised { get; private set; }
+    const string productId_Money1000 = "money_1000";
     private void Awake()
     {
         if (Instance == null)
@@ -24,7 +25,7 @@ public class PurchaseManager : MonoBehaviour, IDetailedStoreListener
     public IEnumerator Init()
     {
         var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
-        //builder = builder.AddProduct(productId_Gems, ProductType.Consumable);
+        builder = builder.AddProduct(productId_Money1000, ProductType.Consumable);
 
         var serv = GetComponent<UnityServicesInit>();
         while(serv.m_initialised == false)

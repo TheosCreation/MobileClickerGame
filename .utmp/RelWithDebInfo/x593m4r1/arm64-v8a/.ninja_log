@@ -1,0 +1,21 @@
+# ninja log v5
+34	224	7529287008499687	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	cbb18e53076ea903
+6	1304	7529287019240799	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	7b8ba126c568e77
+20	1229	7529287018512601	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	d9dac2f801919e38
+225	448	7529287010096632	C:/Users/theoj/MobileClickerGame/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/x593m4r1/obj/arm64-v8a/libswappywrapper.so	e3762c0f3ca34ad0
+25	948	7529287015687252	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	2fc1655a0820519e
+11	1101	7529287017233037	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	415b811784ac3692
+15	980	7529287016011669	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	e57415c3e7cd9faa
+0	1020	7529287016422917	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	18f2d6bdb556a11d
+29	1050	7529287016709201	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	795c3e33bc916a84
+1304	1436	7529287020172345	C:/Users/theoj/MobileClickerGame/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/x593m4r1/obj/arm64-v8a/libgame.so	bc1eff6cb4b5ea16
+37	160	7529320685499771	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	cbb18e53076ea903
+161	352	7529320686779450	C:/Users/theoj/MobileClickerGame/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/x593m4r1/obj/arm64-v8a/libswappywrapper.so	e3762c0f3ca34ad0
+27	598	7529320689848091	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	2fc1655a0820519e
+9	600	7529320689848091	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	18f2d6bdb556a11d
+23	629	7529320690135455	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	e57415c3e7cd9faa
+32	694	7529320690804599	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	795c3e33bc916a84
+13	755	7529320691392317	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	415b811784ac3692
+18	854	7529320692411467	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	d9dac2f801919e38
+3	929	7529320693144474	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	7b8ba126c568e77
+929	1084	7529320694138753	C:/Users/theoj/MobileClickerGame/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/x593m4r1/obj/arm64-v8a/libgame.so	bc1eff6cb4b5ea16
