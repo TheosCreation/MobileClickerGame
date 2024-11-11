@@ -23,9 +23,8 @@ android {
 }
 // Android Resolver Exclusions End
 android {
-    ndkPath "**NDKPATH**"
     namespace "com.unity3d.player"
-
+    ndkPath "**NDKPATH**"
     compileSdkVersion **APIVERSION**
     buildToolsVersion '**BUILDTOOLS**'
 
@@ -43,7 +42,6 @@ android {
         versionCode **VERSIONCODE**
         versionName '**VERSIONNAME**'
         consumerProguardFiles 'proguard-unity.txt'**USER_PROGUARD**
-**DEFAULT_CONFIG_SETUP**
     }
 
     lintOptions {

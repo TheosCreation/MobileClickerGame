@@ -7,12 +7,11 @@ EditorBuildSettings:
   m_Scenes:
   - enabled: 1
     path: Assets/Scenes/BootStrap.unity
-    guid: 7fc299ddcb8a6784db4f1b574d670929
-  - enabled: 1
-    path: Assets/Scenes/MainMenu.unity
-    guid: 8c9cfa26abfee488c85f1582747f6a02
+    guid: 4b545059fc442bc4c8c84b31cff2356b
   - enabled: 1
     path: Assets/Scenes/GameScene.unity
-    guid: 7ab29366b8e2e2a4d96bd46eccd75d63
+    guid: 04861f81be52f4b418722937cb41e8b0
+  - enabled: 1
+    path: Assets/Scenes/MainMenu.unity
+    guid: 2c51a532b0179aa43a1374fe6ddf9b9b
   m_configObjects: {}
-  m_UseUCBPForAssetBundles: 0

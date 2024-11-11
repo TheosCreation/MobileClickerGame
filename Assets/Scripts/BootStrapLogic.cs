@@ -8,6 +8,7 @@ public class BootstrapLogic : MonoBehaviour
     [SerializeField] private PlayGamesAuth playGamesAuth;
     [SerializeField] private AdsInit adsInit;
     [SerializeField] private AdManager adManager;
+    [SerializeField] private bool loadMainMenu = true;
 
     private void Start()
     {
@@ -30,16 +31,19 @@ public class BootstrapLogic : MonoBehaviour
 
         adManager.Init();
 
-        Debug.Log("Starting Main Menu Scene Load!");
+        if (loadMainMenu)
+        {
+            Debug.Log("Starting Main Menu Scene Load!");
 
-        //var operation = SceneManager.LoadSceneAsync(GameManager.Instance.mainMenuScene);
-        //// Tell unity to activate the scene soon as its ready
-        //operation.allowSceneActivation = true;
-        //
-        //// While the main menu scene is loading update the progress 
-        //while (!operation.isDone)
-        //{
-        //    yield return new WaitForEndOfFrame();
-        //}
+            var operation = SceneManager.LoadSceneAsync(GameManager.Instance.mainMenuScene);
+            // Tell unity to activate the scene soon as its ready
+            operation.allowSceneActivation = true;
+
+            // While the main menu scene is loading update the progress 
+            while (!operation.isDone)
+            {
+                yield return new WaitForEndOfFrame();
+            }
+        }
     }
 }
