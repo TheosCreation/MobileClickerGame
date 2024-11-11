@@ -7,7 +7,6 @@ public class BootstrapLogic : MonoBehaviour
     [SerializeField] private UnityServicesInit unityServicesInitilizer;
     [SerializeField] private PlayGamesAuth playGamesAuth;
     [SerializeField] private AdsInit adsInit;
-    [SerializeField] private AdManager adManager;
     [SerializeField] private bool loadMainMenu = true;
 
     private void Start()
@@ -28,8 +27,6 @@ public class BootstrapLogic : MonoBehaviour
         yield return StartCoroutine(PurchaseManager.Instance.Init());
 
         yield return StartCoroutine(GameManager.Instance.Init());
-
-        adManager.Init();
 
         if (loadMainMenu)
         {

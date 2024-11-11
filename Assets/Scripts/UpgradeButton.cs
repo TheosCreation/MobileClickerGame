@@ -16,6 +16,7 @@ public class UpgradeButton : MonoBehaviour
     [SerializeField] private UpgradeType upgradeType = UpgradeType.ManualClick;
     [SerializeField] private double cost = 1000;
     [SerializeField] private float difficultyScale = 1.2f;
+    [SerializeField] private float upgradeAmmount = 0.08f;
 
     private void Awake()
     {
@@ -42,7 +43,7 @@ public class UpgradeButton : MonoBehaviour
         if(GameManager.Instance.CurrentMoney > cost)
         {
             GameManager.Instance.CurrentMoney -= cost;
-            GameManager.Instance.Upgrade(upgradeType);
+            GameManager.Instance.Upgrade(upgradeType, upgradeAmmount);
 
             cost *= difficultyScale;
             UpdateCostText();

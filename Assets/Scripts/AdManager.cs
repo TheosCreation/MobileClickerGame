@@ -3,13 +3,23 @@ using UnityEngine;
 
 public class AdManager : MonoBehaviour
 {
+    public static AdManager Instance { get; private set; }
     BannerView m_banner;
     string m_bannerID = "ca-app-pub-3940256099942544/6300978111";
 
-    public void Init()
+    private void Awake()
     {
-        Load();
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
+
 
     void CreateBanner()
     {

@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 431817236}
   - component: {fileID: 431817238}
   m_Layer: 0
-  m_Name: AdsInit
+  m_Name: AdsManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -660,7 +660,6 @@ MonoBehaviour:
   unityServicesInitilizer: {fileID: 2073558129}
   playGamesAuth: {fileID: 782934707}
   adsInit: {fileID: 431817236}
-  adManager: {fileID: 431817238}
   loadMainMenu: 1
 --- !u!1 &2073558126
 GameObject:

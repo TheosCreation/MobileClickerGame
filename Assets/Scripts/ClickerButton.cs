@@ -9,7 +9,6 @@ public class ClickerButton : MonoBehaviour
     [SerializeField] private Button upgradeButton;
     [SerializeField] private Button unlockButton;
     [SerializeField] private TMP_Text unlockCostText;
-    [SerializeField] private ProgressBar levelProgressBar;
     [SerializeField] private TMP_Text levelProgressText;
     [SerializeField] private TMP_Text upgradeCostText;
 

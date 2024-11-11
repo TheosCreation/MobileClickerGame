@@ -11,7 +11,6 @@ public class GameManager : MonoBehaviour
 
     public int currentLevel = 1;
     public float m_currentLevelProgress = 0.0f;
-    public float pointerValueUpgradeStep = 0.1f;
     public float maxDifficulty = 5.0f;
     [SerializeField] private float levelUpRequirement = 100.0f;
     [SerializeField] private float levelUpMultiplier = 1.2f;
@@ -114,12 +113,12 @@ public class GameManager : MonoBehaviour
         UiManager.Instance.UpdateLevelBar(m_currentLevelProgress / levelUpRequirement);
     }
 
-    public void Upgrade(UpgradeType upgradeType)
+    public void Upgrade(UpgradeType upgradeType, float upgradeStep = 0.0f)
     {
         switch (upgradeType)
         {
             case UpgradeType.ManualClick:
-                pointerValue = Mathf.Min(pointerValue + pointerValueUpgradeStep, maxDifficulty);
+                pointerValue = Mathf.Min(pointerValue + upgradeStep, maxDifficulty);
                 break;
             default:
                 break;
