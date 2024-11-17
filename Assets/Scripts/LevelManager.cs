@@ -4,6 +4,8 @@ public class LevelManager : MonoBehaviour
 {
     [SerializeField] private Transform generatorHolder;
     [HideInInspector] public ClickerButton[] generators;
+    [SerializeField] private Transform upgradesHolder;
+    [HideInInspector] public UpgradeButton[] upgrades;
     public static LevelManager Instance { get; private set; }
 
     private void Awake()
@@ -18,5 +20,40 @@ public class LevelManager : MonoBehaviour
         }
 
         generators = generatorHolder.GetComponentsInChildren<ClickerButton>();
+        upgrades = upgradesHolder.GetComponentsInChildren<UpgradeButton>();
     }
+
+    private void Start()
+    {
+        UnlockLoginForFirstTimeAchivement();
+    }
+
+    private void UnlockLoginForFirstTimeAchivement()
+    {
+        if (Social.localUser.authenticated)
+        {
+            Social.ReportProgress(
+                GPGSIds.achievement_first_time_login,
+                100.0,
+                (bool _success) =>
+                {
+                    Social.ShowAchievementsUI();
+                });
+
+        }
+    }
+
+    public void SaveLevelObjects()
+    {
+        foreach (var generator in generators)
+        {
+            generator.SaveData();
+        }
+        
+        foreach (var upgrade in upgrades)
+        {
+            upgrade.SaveData();
+        }
+    }
+
 }

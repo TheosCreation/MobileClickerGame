@@ -37,7 +37,8 @@ public class UiManager : MonoBehaviour
     private void Start()
     {
         UpdateCurrentMoneyText(GameManager.Instance.CurrentMoney);
-        UpdateLevelBar(0);
+        UpdateLevelBar(GameManager.Instance.m_currentLevelProgress / GameManager.Instance.levelUpRequirement);
+        UpdateLevel(GameManager.Instance.currentLevel);
     }
 
 

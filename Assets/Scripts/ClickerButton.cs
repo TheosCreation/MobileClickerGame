@@ -1,9 +1,11 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ClickerButton : MonoBehaviour
 {
+    public string buttonID;
     public bool isLocked = false;
     [SerializeField] private Button clickerButton;
     [SerializeField] private Button upgradeButton;
@@ -21,7 +23,7 @@ public class ClickerButton : MonoBehaviour
     [SerializeField] private double collectionAmount = 1.0f;
     [SerializeField] private double currentUpgradeCost = 200.0f;
     [SerializeField] private double unlockCost = 10000;
-    private int level = 1;
+    public int level = 1;
     public int levelRequiredToUnlock = 0;
     float collectionProgress = 0.0f;
 
@@ -37,6 +39,11 @@ public class ClickerButton : MonoBehaviour
         clickerButton.onClick.RemoveAllListeners();
         upgradeButton.onClick.RemoveAllListeners();
         unlockButton.onClick.RemoveAllListeners();
+    }
+
+    private void Awake()
+    {
+        LoadData();
     }
 
     private void Start()
@@ -141,6 +148,29 @@ public class ClickerButton : MonoBehaviour
         else
         {
             levelLockedOverlay.SetActive(false);
+        }
+    }
+
+    public void SaveData()
+    {
+        var data = new GeneratorSaveData
+        {
+            CurrentLevel = level,
+            CollectAmount = (float)collectionAmount,
+            UpgradeCost = (float)currentUpgradeCost,
+            IsLocked = isLocked
+        };
+        GameManager.Instance.SaveGeneratorData(buttonID, data);
+    }
+
+    private void LoadData()
+    {
+        if (GameManager.Instance.TryGetGeneratorData(buttonID, out GeneratorSaveData data))
+        {
+            level = data.CurrentLevel;
+            collectionAmount = data.CollectAmount;
+            currentUpgradeCost = data.UpgradeCost;
+            isLocked = data.IsLocked;
         }
     }
 }

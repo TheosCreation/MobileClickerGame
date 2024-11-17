@@ -47,7 +47,7 @@ MonoBehaviour:
   mainMenuScene: MainMenu
   currentLevel: 1
   m_currentLevelProgress: 0
-  maxDifficulty: 5
-  levelUpRequirement: 100
-  levelUpMultiplier: 1.2
-  pointerValue: 0.1
+  maxDifficulty: 8
+  levelUpRequirement: 1000
+  levelUpMultiplier: 1.5
+  pointerValue: 0.05
