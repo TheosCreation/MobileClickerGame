@@ -8,6 +8,7 @@ public class BootstrapLogic : MonoBehaviour
     [SerializeField] private PlayGamesAuth playGamesAuth;
     [SerializeField] private AdsInit adsInit;
     [SerializeField] private bool loadMainMenu = true;
+    [SerializeField] private NotificationPermissions notificationPermissions;
 
     private void Start()
     {
@@ -27,6 +28,13 @@ public class BootstrapLogic : MonoBehaviour
         yield return StartCoroutine(PurchaseManager.Instance.Init());
 
         yield return StartCoroutine(GameManager.Instance.Init());
+
+        yield return StartCoroutine(NotificationManager.Instance.Init());
+
+        if (!notificationPermissions.IsPermissionGranted())
+        {
+            notificationPermissions.RequestNotificationPermission();
+        }
 
         if (loadMainMenu)
         {

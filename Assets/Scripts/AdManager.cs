@@ -7,17 +7,16 @@ public class AdManager : MonoBehaviour
 
     // Banner Ad
     private BannerView m_banner;
-    private string m_bannerID = "ca-app-pub-3940256099942544/6300978111";
+    private string m_bannerID = "ca-app-pub-3940256099942544/6300978111"; //test ad
 
     // Interstitial Ad
     private InterstitialAd m_interstitial;
-    private string m_interstitialID = "ca-app-pub-3940256099942544/1033173712";
+    private string m_interstitialID = "ca-app-pub-3898769752999198/8336587416"; //from ad mob
 
     // Rewarded Ad
     private RewardedAd m_rewarded;
-    private string m_rewardedID = "ca-app-pub-3940256099942544/5224354917";
-
-    private bool adsDisabled = false; // Flag to track ad removal
+    private string m_rewardedID = "ca-app-pub-3898769752999198/8426158692"; //from ad mob
+    private float currentReward = 0f; 
 
     private void Awake()
     {
@@ -35,8 +34,7 @@ public class AdManager : MonoBehaviour
     private void Start()
     {
         //LoadBanner();
-        //CreateInterstitial();
-        //CreateRewarded();
+        CreateInterstitial();
     }
 
     void CreateBanner()
@@ -49,7 +47,7 @@ public class AdManager : MonoBehaviour
         }
 
         // Only create the banner if ads are not disabled
-        if (!adsDisabled)
+        if (!GameManager.Instance.GameState.adsDisabled)
         {
             m_banner = new BannerView(m_bannerID, AdSize.Banner, AdPosition.Top);
         }
@@ -57,7 +55,7 @@ public class AdManager : MonoBehaviour
 
     private void LoadBanner()
     {
-        if (adsDisabled) return;
+        if (GameManager.Instance.GameState.adsDisabled) return;
 
         if (m_banner == null)
         {
@@ -79,7 +77,7 @@ public class AdManager : MonoBehaviour
 
     public void CreateInterstitial()
     {
-        if (adsDisabled) return;
+        if (GameManager.Instance.GameState.adsDisabled) return;
 
         AdRequest adRequest = new AdRequest();
         InterstitialAd.Load(m_interstitialID, adRequest, (InterstitialAd ad, LoadAdError err) =>
@@ -112,40 +110,39 @@ public class AdManager : MonoBehaviour
         }
     }
 
-    public void CreateRewarded()
+    public void CreateRewarded(float Amount)
     {
         Debug.Log("Creating rewarded ad");
+
+        if (currentReward != Amount)
+        {
+            currentReward = Amount;
+        }
 
         if (m_rewarded != null)
         {
             DestroyRewarded();
         }
 
-        if (!adsDisabled)
+        AdRequest adRequest = new AdRequest();
+        RewardedAd.Load(m_rewardedID, adRequest, (RewardedAd ad, LoadAdError err) =>
         {
-            AdRequest adRequest = new AdRequest();
-            RewardedAd.Load(m_rewardedID, adRequest, (RewardedAd ad, LoadAdError err) =>
+            if (err != null || ad == null)
             {
-                if (err != null || ad == null)
-                {
-                    Debug.LogError("Rewarded ad failed to load: " + err);
-                    return;
-                }
+                Debug.LogError("Rewarded ad failed to load: " + err);
+                return;
+            }
 
-                Debug.Log("Rewarded ad loaded with response: " + ad.GetResponseInfo());
-                m_rewarded = ad;
-
-                // Subscribe to the event once the ad is loaded
-                m_rewarded.OnAdFullScreenContentClosed += HandleOnRewardedClosed;
-            });
-        }
+            Debug.Log("Rewarded ad loaded with response: " + ad.GetResponseInfo());
+            m_rewarded = ad;
+            ShowRewarded();
+        });
     }
 
     private void DestroyRewarded()
     {
         if (m_rewarded != null)
         {
-            m_rewarded.OnAdFullScreenContentClosed -= HandleOnRewardedClosed; // Unsubscribe to avoid memory leaks
             m_rewarded = null;
         }
     }
@@ -160,18 +157,14 @@ public class AdManager : MonoBehaviour
 
     private void HandleUserEarnedReward(Reward reward)
     {
-        Debug.Log("Reward earned");
-    }
-
-    private void HandleOnRewardedClosed()
-    {
-        CreateRewarded();
+        Debug.Log("User rewarded with " + NumberFormatter.FormatLargeNumber(currentReward));
+        GameManager.Instance.CurrentMoney += currentReward;
     }
 
     public void DisableAds()
     {
         Debug.Log("Disabling all ads");
-        adsDisabled = true;
+        GameManager.Instance.GameState.adsDisabled = true;
 
         DestroyBanner();
         DestroyInterstitial();

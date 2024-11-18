@@ -1,4 +1,7 @@
 using Assets.Scripts.JsonSerialization;
+using GooglePlayGames.BasicApi.SavedGame;
+using GooglePlayGames.BasicApi;
+using GooglePlayGames;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -18,7 +21,8 @@ public class GameManager : MonoBehaviour
     public float pointerValue = 0.1f; // amount to collect on manual clicks
 
     private IDataService DataService = new JsonDataService();
-    private const string gameStateFilePath = "/game-state.json";
+    private const string gameStateFilePath = "/game-state.json"; 
+    private bool cloudLoadSuccessful = false;
 
     private double m_CurrentMoney;
     public double CurrentMoney
@@ -36,7 +40,24 @@ public class GameManager : MonoBehaviour
             }
 
             m_CurrentMoney = value;
-            UiManager.Instance.UpdateCurrentMoneyText(value);
+            if (UiManager.Instance != null)
+            {
+                UiManager.Instance.UpdateCurrentMoneyText(value);
+            }
+
+            if (LevelManager.Instance != null)
+            {
+                if (m_CurrentMoney > 1000000 && !GameState.hasUnlocked1MillionAchievement)
+                {
+                    LevelManager.Instance.Unlock1MillionMoneyAchivement();
+                    GameState.hasUnlocked1MillionAchievement = true;
+                }
+                if (m_CurrentMoney > 1000000000 && !GameState.hasUnlocked1BillionAchievement)
+                {
+                    LevelManager.Instance.Unlock1BillionMoneyAchivement();
+                    GameState.hasUnlocked1BillionAchievement = true;
+                }
+            }
         }
     }
 
@@ -58,11 +79,58 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator Init()
     {
-        //load from save files
-        UnSerializeGameStateFromJson();
+        // Attempt to load from cloud first
+        yield return LoadGame();
+
+        InvokeRepeating(nameof(SaveGame), 60f, 300f); //Save game after 60 seconds and every 300 seconds after
 
         Debug.Log("Game manager init sucessfully");
         yield return null;
+    }
+
+    public IEnumerator LoadGame()
+    {
+        // Attempt to load from cloud first
+        yield return LoadGameFromCloudAsync();
+
+        // If cloud load failed, fall back to local save
+        if (!cloudLoadSuccessful)
+        {
+            Debug.Log("Cloud load failed, falling back to local save.");
+            UnSerializeGameStateFromJson();
+        }
+
+        m_currentLevelProgress = GameState.LevelSaveData.Progress;
+        currentLevel = GameState.LevelSaveData.CurrentLevel;
+        levelUpRequirement = GameState.LevelSaveData.LevelUpRequirement;
+
+        pointerValue = GameState.PointerValue;
+        CurrentMoney = GameState.CurrentMoney;
+    }
+
+    public void SaveGame()
+    {
+        if (LevelManager.Instance != null)
+        {
+            LevelManager.Instance.SaveLevelObjects();
+        }
+
+        // Update values before saving
+        GameState.CurrentMoney = CurrentMoney;
+        GameState.PointerValue = pointerValue;
+
+        GameState.LevelSaveData.CurrentLevel = currentLevel;
+        GameState.LevelSaveData.Progress = m_currentLevelProgress;
+        GameState.LevelSaveData.LevelUpRequirement = levelUpRequirement;
+
+        // Save locally
+        SerializeGameStateToJson();
+
+        // Save to cloud (if the player is authenticated)
+        if (Social.localUser.authenticated)
+        {
+            SaveGameToCloud();
+        }
     }
 
     public void UnSerializeGameStateFromJson()
@@ -88,25 +156,11 @@ public class GameManager : MonoBehaviour
             GameState = new GameState(levelUpRequirement, pointerValue);
             Debug.Log("Initialized fresh game state to allow the game to proceed.");
         }
-
-        m_currentLevelProgress = GameState.LevelSaveData.Progress;
-        currentLevel = GameState.LevelSaveData.CurrentLevel;
-        levelUpRequirement = GameState.LevelSaveData.LevelUpRequirement;
-
-        pointerValue = GameState.PointerValue;
-        CurrentMoney = GameState.CurrentMoney;
     }
 
+    
     public void SerializeGameStateToJson()
     {
-        // Update values then save
-        GameState.CurrentMoney = CurrentMoney;
-        GameState.PointerValue = pointerValue;
-
-        GameState.LevelSaveData.CurrentLevel = currentLevel;
-        GameState.LevelSaveData.Progress = m_currentLevelProgress;
-        GameState.LevelSaveData.LevelUpRequirement = levelUpRequirement;
-
         long startTime = DateTime.Now.Ticks;
         try
         {
@@ -121,7 +175,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void LoadGame()
+    public void LoadGameScene()
     {
         Debug.Log("Loading Game Scene... ");
         MainMenuManager.Instance.OpenLoadingPage();
@@ -135,6 +189,7 @@ public class GameManager : MonoBehaviour
         {
             LevelManager.Instance.SaveLevelObjects();
         }
+        PauseManager.Instance.UnPause();
         SceneManager.LoadScene(mainMenuScene);
     }
     public void Quit()
@@ -149,6 +204,9 @@ public class GameManager : MonoBehaviour
         {
             // Level up
             currentLevel++;
+
+            // Upload the current level to the leaderboards
+            UploadLevelToLeaderboard();
 
             // Reset progress
             m_currentLevelProgress = 0.0f;
@@ -197,11 +255,15 @@ public class GameManager : MonoBehaviour
 
     private void OnApplicationQuit()
     {
-        if (LevelManager.Instance != null)
+        SaveGame();
+    }
+
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        if (pauseStatus)
         {
-            LevelManager.Instance.SaveLevelObjects();
+            SaveGame();
         }
-        SerializeGameStateToJson();
     }
 
     public void SaveGeneratorData(string id, GeneratorSaveData data)
@@ -212,5 +274,162 @@ public class GameManager : MonoBehaviour
     public bool TryGetGeneratorData(string id, out GeneratorSaveData data)
     {
         return GameState.TryGetGeneratorData(id, out data);
+    }
+
+    public void SaveGameToCloud()
+    {
+        if (Social.localUser.authenticated)
+        {
+            PlayGamesPlatform.Instance.SavedGame.OpenWithAutomaticConflictResolution(
+                gameStateFilePath,
+                DataSource.ReadCacheOrNetwork,
+                ConflictResolutionStrategy.UseLongestPlaytime,
+                OnSavedGameOpenedForSave);
+        }
+    }
+
+    private void OnSavedGameOpenedForSave(SavedGameRequestStatus status, ISavedGameMetadata game)
+    {
+        if (status == SavedGameRequestStatus.Success)
+        {
+            byte[] data = System.Text.Encoding.UTF8.GetBytes(SerializeGameState());
+            SavedGameMetadataUpdate update = new SavedGameMetadataUpdate.Builder()
+                .WithUpdatedDescription("Game saved at " + DateTime.Now)
+                .Build();
+
+            PlayGamesPlatform.Instance.SavedGame.CommitUpdate(game, update, data, OnSaveGameWritten);
+        }
+        else
+        {
+            Debug.LogError("Failed to open save game for saving.");
+        }
+    }
+    private string SerializeGameState()
+    {
+        return JsonUtility.ToJson(GameState);
+    }
+
+    private void DeserializeGameState(string json)
+    {
+        GameState = JsonUtility.FromJson<GameState>(json);
+    }
+    private void OnSaveGameWritten(SavedGameRequestStatus status, ISavedGameMetadata game)
+    {
+        if (status == SavedGameRequestStatus.Success)
+        {
+            Debug.Log("Game saved successfully to cloud.");
+        }
+        else
+        {
+            Debug.LogError("Failed to write save data to cloud.");
+        }
+    }
+
+    public IEnumerator LoadGameFromCloudAsync()
+    {
+        if (Social.localUser.authenticated)
+        {
+            // Reset flag
+            cloudLoadSuccessful = false;
+
+            // Start the async cloud load process
+            bool cloudLoadCompleted = false;
+            PlayGamesPlatform.Instance.SavedGame.OpenWithAutomaticConflictResolution(
+                gameStateFilePath,
+                DataSource.ReadCacheOrNetwork,
+                ConflictResolutionStrategy.UseLongestPlaytime,
+                (status, game) => {
+                    if (status == SavedGameRequestStatus.Success)
+                    {
+                        PlayGamesPlatform.Instance.SavedGame.ReadBinaryData(game, (readStatus, data) => {
+                            if (readStatus == SavedGameRequestStatus.Success)
+                            {
+                                string json = System.Text.Encoding.UTF8.GetString(data);
+                                DeserializeGameState(json);
+                                cloudLoadSuccessful = true;
+                                Debug.Log("Game loaded successfully from cloud.");
+                            }
+                            else
+                            {
+                                Debug.LogError("Failed to read save game data from cloud.");
+                            }
+                            cloudLoadCompleted = true;
+                        });
+                    }
+                    else
+                    {
+                        Debug.LogError("Failed to open save game for loading.");
+                        cloudLoadCompleted = true;
+                    }
+                }
+            );
+
+            // Wait until the cloud load process completes
+            yield return new WaitUntil(() => cloudLoadCompleted);
+        }
+        else
+        {
+            Debug.LogWarning("User not authenticated for cloud services.");
+        }
+    }
+
+    private void OnSavedGameOpenedForLoad(SavedGameRequestStatus status, ISavedGameMetadata game)
+    {
+        if (status == SavedGameRequestStatus.Success)
+        {
+            PlayGamesPlatform.Instance.SavedGame.ReadBinaryData(game, OnSaveGameDataRead);
+        }
+        else
+        {
+            Debug.LogError("Failed to open save game for loading.");
+        }
+    }
+
+    private void OnSaveGameDataRead(SavedGameRequestStatus status, byte[] data)
+    {
+        if (status == SavedGameRequestStatus.Success)
+        {
+            string json = System.Text.Encoding.UTF8.GetString(data);
+            DeserializeGameState(json);
+            Debug.Log("Game loaded successfully from cloud.");
+        }
+        else
+        {
+            Debug.LogError("Failed to read save game data.");
+        }
+    }
+
+    public void UploadLevelToLeaderboard()
+    {
+        if (Social.localUser.authenticated)
+        {
+            Social.ReportScore(currentLevel, GPGSIds.leaderboard_highest_level_leaderboard, (bool success) =>
+            {
+                if (success)
+                {
+                    Debug.Log("Successfully uploaded level to global leaderboard.");
+                }
+                else
+                {
+                    Debug.LogError("Failed to upload level to global leaderboard.");
+                }
+            });
+
+            Social.ReportScore(currentLevel, GPGSIds.leaderboard_daily_highest_level_leaderboard, (bool success) =>
+            {
+                if (success)
+                {
+                    Debug.Log("Successfully uploaded level to daily leaderboard.");
+                }
+                else
+                {
+                    Debug.LogError("Failed to upload level to daily leaderboard.");
+                }
+            });
+        }
+        else
+        {
+            Debug.LogWarning("User not authenticated, cannot upload score to leaderboard.");
+        }
     }
 }

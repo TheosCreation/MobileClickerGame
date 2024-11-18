@@ -11,6 +11,10 @@ public class UiManager : MonoBehaviour
     [SerializeField] private ProgressBar levelProgressBar;
     [SerializeField] private TMP_Text currentLevelText;
     [SerializeField] private Button upgradeLevelButton;
+    [SerializeField] private Button shopButton;
+    [SerializeField] private ShopMenu shopMenu;
+    [SerializeField] private Button pauseButton;
+    [SerializeField] private PauseMenu pauseMenu;
 
     private void Awake()
     {
@@ -27,11 +31,15 @@ public class UiManager : MonoBehaviour
     private void OnEnable()
     {
         upgradeLevelButton.onClick.AddListener(GameManager.Instance.UpgradeLevel);
+        shopButton.onClick.AddListener(OpenShopMenu);
+        pauseButton.onClick.AddListener(OpenPauseMenu);
     }
 
     private void OnDisable()
     {
         upgradeLevelButton.onClick.RemoveAllListeners();
+        shopButton.onClick.RemoveAllListeners();
+        pauseButton.onClick.RemoveAllListeners();
     }
 
     private void Start()
@@ -39,6 +47,9 @@ public class UiManager : MonoBehaviour
         UpdateCurrentMoneyText(GameManager.Instance.CurrentMoney);
         UpdateLevelBar(GameManager.Instance.m_currentLevelProgress / GameManager.Instance.levelUpRequirement);
         UpdateLevel(GameManager.Instance.currentLevel);
+
+        ClosePauseMenu();
+        CloseShopMenu();
     }
 
 
@@ -55,5 +66,26 @@ public class UiManager : MonoBehaviour
     public void UpdateLevel(int currentLevel)
     {
         currentLevelText.text = "Level " + currentLevel.ToString();
+    }
+
+    public void OpenShopMenu()
+    {
+        shopMenu.gameObject.SetActive(true);
+    }
+
+    public void CloseShopMenu()
+    {
+        shopMenu.gameObject.SetActive(false);
+    }
+
+    public void OpenPauseMenu()
+    {
+        PauseManager.Instance.Pause();
+        pauseMenu.gameObject.SetActive(true);
+    }
+    public void ClosePauseMenu()
+    {
+        PauseManager.Instance.UnPause();
+        pauseMenu.gameObject.SetActive(false);
     }
 }

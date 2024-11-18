@@ -7,7 +7,6 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private MainMenuMainPage mainPage;
     [SerializeField] private LoadingPage loadingPage;
 
-
     private void Awake()
     {
         if (Instance == null)

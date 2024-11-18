@@ -42,6 +42,35 @@ public class LevelManager : MonoBehaviour
 
         }
     }
+    public void Unlock1MillionMoneyAchivement()
+    {
+        if (Social.localUser.authenticated)
+        {
+            Social.ReportProgress(
+                GPGSIds.achievement_reach_1_million_dollars,
+                100.0,
+                (bool _success) =>
+                {
+                    Social.ShowAchievementsUI();
+                });
+
+        }
+    }
+
+    public void Unlock1BillionMoneyAchivement()
+    {
+        if (Social.localUser.authenticated)
+        {
+            Social.ReportProgress(
+                GPGSIds.achievement_reach_1_billion_dollar,
+                100.0,
+                (bool _success) =>
+                {
+                    Social.ShowAchievementsUI();
+                });
+
+        }
+    }
 
     public void SaveLevelObjects()
     {

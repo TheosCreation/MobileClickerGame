@@ -7,8 +7,8 @@ public class PurchaseManager : MonoBehaviour, IDetailedStoreListener
 {
     public static PurchaseManager Instance { get; private set; }
     public bool m_initialised { get; private set; }
-    const string productId_Money1000 = "money_1000";
-    const string productId_NoAds = "no_ads";
+    public const string productId_Money1000 = "money_1000";
+    public const string productId_NoAds = "no_ads";
 
     private IStoreController storeController;
     private IExtensionProvider storeExtensionProvider;
@@ -47,6 +47,12 @@ public class PurchaseManager : MonoBehaviour, IDetailedStoreListener
     {
         if (m_initialised && storeController != null)
         {
+            if (productId == productId_NoAds && GameManager.Instance.GameState.adsDisabled)
+            {
+                Debug.Log("No Ads has already been purchased. Cannot purchase again.");
+                return;
+            }
+
             storeController.InitiatePurchase(productId);
             Debug.Log($"Attempting to purchase product: {productId}");
         }

@@ -31,6 +31,12 @@ public class GameState
     public Dictionary<string, GeneratorSaveData> GeneratorsData = new Dictionary<string, GeneratorSaveData>();
     public Dictionary<string, ManualClickerUpgradeSaveData> UpgradeButtonsData = new Dictionary<string, ManualClickerUpgradeSaveData>();
     public float PointerValue;
+    public bool adsDisabled = false;
+    public bool hasUnlocked1MillionAchievement = false;
+    public bool hasUnlocked1BillionAchievement = false;
+
+    public float dailyRewardValue = 1000f;
+    public DateTime lastDailyRewardClaimTime = DateTime.Now.AddDays(-1);
 
     public GameState(float levelUpRequirement, float pointerValue)
     {

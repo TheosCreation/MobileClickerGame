@@ -24,7 +24,11 @@
 
 public static class GPGSIds
 {
+        public const string leaderboard_daily_highest_level_leaderboard = "CgkIsa7Ju50BEAIQBQ"; // <GPGSID>
+        public const string achievement_reach_1_billion_dollar = "CgkIsa7Ju50BEAIQBA"; // <GPGSID>
         public const string achievement_first_time_login = "CgkIsa7Ju50BEAIQAQ"; // <GPGSID>
+        public const string achievement_reach_1_million_dollars = "CgkIsa7Ju50BEAIQAw"; // <GPGSID>
+        public const string leaderboard_highest_level_leaderboard = "CgkIsa7Ju50BEAIQAg"; // <GPGSID>
 
 }
 
