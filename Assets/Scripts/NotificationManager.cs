@@ -1,11 +1,13 @@
+using System;
 using System.Collections;
 using Unity.Notifications.Android;
-using UnityEngine.Android;
 using UnityEngine;
 
 public class NotificationManager : MonoBehaviour
 {
     public static NotificationManager Instance { get; private set; }
+
+    private const string LastNotificationDateKey = "LastNotificationDate";
 
     private void Awake()
     {
@@ -18,13 +20,6 @@ public class NotificationManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-
-        //// Check if the app was opened from a notification tap
-        //var notificationIntentData = AndroidNotificationCenter.GetLastNotificationIntent();
-        //if (notificationIntentData != null)
-        //{
-        //    OnNotificationTapped(notificationIntentData);
-        //}
     }
 
     public IEnumerator Init()
@@ -44,7 +39,11 @@ public class NotificationManager : MonoBehaviour
 
         AndroidNotificationCenter.RegisterNotificationChannel(channel);
 
-        ScheduleDailyNotification("Welcome Back!", "Ready to collect more money? Come back and play again!", "OpenGame");
+        // Check if we need to schedule the daily notification
+        if (IsNewDay())
+        {
+            ScheduleDailyNotification("Welcome Back!", "Ready to collect more money? Come back and play again!", "OpenGame");
+        }
 
         yield return null;
     }
@@ -71,7 +70,6 @@ public class NotificationManager : MonoBehaviour
     {
         Debug.Log("Scheduled a daily message");
 
-        // Set the fire time to the current date at a specific time (e.g., 9:00 AM)
         var fireTime = System.DateTime.Today.AddHours(9); // 9:00 AM daily
 
         // If it's already past 9:00 AM today, schedule for tomorrow
@@ -93,23 +91,27 @@ public class NotificationManager : MonoBehaviour
         // Send the notification with the specified channel
         AndroidNotificationCenter.SendNotification(notification, "default_channel");
 
-        // Start a coroutine to reschedule this notification daily
-        StartCoroutine(RescheduleDailyNotification(notification, fireTime));
+        // Update the game state with the current date for whenever we need to schedule another notification
+        GameManager.Instance.GameState.LastNotificationDate = System.DateTime.Now.ToString("yyyy-MM-dd");
     }
 
-    private IEnumerator RescheduleDailyNotification(AndroidNotification notification, System.DateTime fireTime)
+    // Check if the current date is different from the last scheduled date
+    private bool IsNewDay()
     {
-        // Wait until the next day
-        yield return new WaitForSeconds((float)(fireTime - System.DateTime.Now).TotalSeconds);
+        string lastScheduledDateString = GameManager.Instance.GameState.LastNotificationDate;
 
-        // Reschedule the notification for the next day
-        notification.FireTime = fireTime.AddDays(1);
-        AndroidNotificationCenter.SendNotification(notification, "default_channel");
+        if (string.IsNullOrEmpty(lastScheduledDateString))
+        {
+            // If there's no record of the last scheduled date, it's considered a new day
+            return true;
+        }
 
-        // Call this method again to keep rescheduling daily
-        StartCoroutine(RescheduleDailyNotification(notification, fireTime.AddDays(1)));
+        DateTime lastScheduledDate = DateTime.Parse(lastScheduledDateString);
+
+        // Compare only the date part (ignoring time)
+        return lastScheduledDate.Date != DateTime.Now.Date;
     }
-    
+
     private void OnNotificationTapped(AndroidNotificationIntentData intentData)
     {
         // Check the IntentData for specific actions
